@@ -5,17 +5,6 @@
   "env": {
     "NEXT_PUBLIC_LAUNCH_PHASE": "full"
   },
-  "functions": {
-    "app/api/**/*.ts": {
-      "runtime": "nodejs22.x"
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",
