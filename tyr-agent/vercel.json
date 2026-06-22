@@ -3,15 +3,7 @@
   "framework": "nextjs",
   "installCommand": "npm install",
   "env": {
-    "NEXT_PUBLIC_LAUNCH_PHASE": "full",
-    "NEXT_PUBLIC_SUPABASE_URL": "@supabase_url",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase_anon_key",
-    "SUPABASE_SERVICE_KEY": "@supabase_service_key",
-    "SUPABASE_SERVICE_ROLE_KEY": "@supabase_service_role_key",
-    "MISTRAL_API_KEY": "@mistral_api_key",
-    "RESEND_API_KEY": "@resend_api_key",
-    "RESEND_FROM_EMAIL": "@resend_from_email",
-    "ADMIN_SECRET": "@admin_secret"
+    "NEXT_PUBLIC_LAUNCH_PHASE": "full"
   },
   "functions": {
     "app/api/**/*.ts": {
