@@ -5,34 +5,32 @@ export async function POST(request: NextRequest) {
   try {
     const { text, targetLang, sourceLang } = await request.json()
 
-    // Validation
     if (!text || typeof text !== 'string') {
-      const error = validationError('text', 'Le texte à traduire est requis')
+      const error = validationError('text', 'Text to translate is required')
       return NextResponse.json({ error }, { status: 400 })
     }
 
     if (!targetLang || !['zh', 'fr'].includes(targetLang)) {
-      const error = validationError('targetLang', 'Langue cible invalide. Valeurs acceptées: zh, fr')
+      const error = validationError('targetLang', 'Invalid target language. Accepted values: zh, fr')
       return NextResponse.json({ error }, { status: 400 })
     }
 
     if (!sourceLang || !['zh', 'fr'].includes(sourceLang)) {
-      const error = validationError('sourceLang', 'Langue source invalide. Valeurs acceptées: zh, fr')
+      const error = validationError('sourceLang', 'Invalid source language. Accepted values: zh, fr')
       return NextResponse.json({ error }, { status: 400 })
     }
 
     const apiKey = process.env.MISTRAL_API_KEY
 
     if (!apiKey) {
-      // Fallback: return text with a note - this is expected behavior, not an error
       return NextResponse.json({ 
         translation: text,
-        warning: 'Clé API Mistral non configurée, retour du texte original'
+        warning: 'Mistral API key not configured, returning original text'
       })
     }
 
-    const targetLanguage = targetLang === 'zh' ? 'chinois' : 'français'
-    const sourceLanguage = sourceLang === 'zh' ? 'chinois' : 'français'
+    const targetLanguage = targetLang === 'zh' ? 'Chinese' : 'French'
+    const sourceLanguage = sourceLang === 'zh' ? 'Chinese' : 'French'
 
     const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
       method: 'POST',
@@ -45,11 +43,11 @@ export async function POST(request: NextRequest) {
         messages: [
           {
             role: 'system',
-            content: `Tu es un assistant de traduction professionnel. Traduis uniquement le texte fourni de manière naturelle et professionnelle. Ne fais aucune modification autre que la traduction. Si le texte est déjà dans la langue cible, retourne-le tel quel.`
+            content: 'You are a professional translation assistant. Translate only the provided text naturally and professionally. Do not make any changes other than translation. If the text is already in the target language, return it as is.'
           },
           {
             role: 'user',
-            content: `Traduis ce texte du ${sourceLanguage} vers le ${targetLanguage}:\n\n${text}`
+            content: `Translate this text from ${sourceLanguage} to ${targetLanguage}:\n\n${text}`
           }
         ],
         temperature: 0.3,
@@ -62,16 +60,16 @@ export async function POST(request: NextRequest) {
       console.error('Mistral API error:', errorData)
       
       if (response.status === 401) {
-        const error = createError('Clé API Mistral invalide', 'INVALID_API_KEY')
+        const error = createError('Invalid Mistral API key', 'INVALID_API_KEY')
         return NextResponse.json({ error }, { status: 401 })
       }
       
       if (response.status === 429) {
-        const error = createError('Trop de requêtes à l\'API Mistral', 'RATE_LIMITED', 'Veuillez réessayer plus tard')
+        const error = createError('Too many requests to Mistral API', 'RATE_LIMITED', 'Please try again later')
         return NextResponse.json({ error }, { status: 429 })
       }
 
-      const error = createError('Erreur de traduction', 'TRANSLATION_ERROR', JSON.stringify(errorData))
+      const error = createError('Translation error', 'TRANSLATION_ERROR', JSON.stringify(errorData))
       return NextResponse.json({ error }, { status: 500 })
     }
 
@@ -79,7 +77,7 @@ export async function POST(request: NextRequest) {
     const translation = data.choices?.[0]?.message?.content?.trim()
 
     if (!translation) {
-      const error = createError('Pas de traduction reçue', 'EMPTY_TRANSLATION')
+      const error = createError('No translation received', 'EMPTY_TRANSLATION')
       return NextResponse.json({ error }, { status: 500 })
     }
 
