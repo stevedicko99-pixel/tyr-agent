@@ -3,29 +3,32 @@ import { createError, handleApiError, validationError } from '@/lib/api/error-ha
 
 export async function POST(request: NextRequest) {
   try {
-    const { text, targetLang, sourceLang } = await request.json()
+    const body = await request.json()
+    const text = body.text
+    const targetLang = body.targetLang
+    const sourceLang = body.sourceLang
 
     if (!text || typeof text !== 'string') {
-      const error = validationError('text', 'Text to translate is required')
-      return NextResponse.json({ error }, { status: 400 })
+      const err = validationError('text', 'Text required')
+      return NextResponse.json({ error: err }, { status: 400 })
     }
 
     if (!targetLang || !['zh', 'fr'].includes(targetLang)) {
-      const error = validationError('targetLang', 'Invalid target language. Accepted values: zh, fr')
-      return NextResponse.json({ error }, { status: 400 })
+      const err = validationError('targetLang', 'Invalid target language')
+      return NextResponse.json({ error: err }, { status: 400 })
     }
 
     if (!sourceLang || !['zh', 'fr'].includes(sourceLang)) {
-      const error = validationError('sourceLang', 'Invalid source language. Accepted values: zh, fr')
-      return NextResponse.json({ error }, { status: 400 })
+      const err = validationError('sourceLang', 'Invalid source language')
+      return NextResponse.json({ error: err }, { status: 400 })
     }
 
     const apiKey = process.env.MISTRAL_API_KEY
 
     if (!apiKey) {
-      return NextResponse.json({ 
+      return NextResponse.json({
         translation: text,
-        warning: 'Mistral API key not configured, returning original text'
+        warning: 'API key not configured'
       })
     }
 
@@ -36,18 +39,18 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'Authorization': 'Bearer ' + apiKey
       },
       body: JSON.stringify({
         model: 'mistral-small',
         messages: [
           {
             role: 'system',
-            content: 'You are a professional translation assistant. Translate only the provided text naturally and professionally. Do not make any changes other than translation. If the text is already in the target language, return it as is.'
+            content: 'Translate text naturally'
           },
           {
             role: 'user',
-            content: `Translate this text from ${sourceLanguage} to ${targetLanguage}:\n\n${text}`
+            content: 'Translate from ' + sourceLanguage + ' to ' + targetLanguage + ': ' + text
           }
         ],
         temperature: 0.3,
@@ -56,37 +59,43 @@ export async function POST(request: NextRequest) {
     })
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: await response.text() }))
-      console.error('Mistral API error:', errorData)
-      
-      if (response.status === 401) {
-        const error = createError('Invalid Mistral API key', 'INVALID_API_KEY')
-        return NextResponse.json({ error }, { status: 401 })
-      }
-      
-      if (response.status === 429) {
-        const error = createError('Too many requests to Mistral API', 'RATE_LIMITED', 'Please try again later')
-        return NextResponse.json({ error }, { status: 429 })
+      let errorData = {}
+      try {
+        errorData = await response.json()
+      } catch {
+        errorData = { message: await response.text() }
       }
 
-      const error = createError('Translation error', 'TRANSLATION_ERROR', JSON.stringify(errorData))
-      return NextResponse.json({ error }, { status: 500 })
+      console.error('API error:', errorData)
+
+      if (response.status === 401) {
+        const err = createError('Invalid API key', 'INVALID_API_KEY')
+        return NextResponse.json({ error: err }, { status: 401 })
+      }
+
+      if (response.status === 429) {
+        const err = createError('Too many requests', 'RATE_LIMITED', 'Try again later')
+        return NextResponse.json({ error: err }, { status: 429 })
+      }
+
+      const err = createError('Translation error', 'TRANSLATION_ERROR', JSON.stringify(errorData))
+      return NextResponse.json({ error: err }, { status: 500 })
     }
 
     const data = await response.json()
     const translation = data.choices?.[0]?.message?.content?.trim()
 
     if (!translation) {
-      const error = createError('No translation received', 'EMPTY_TRANSLATION')
-      return NextResponse.json({ error }, { status: 500 })
+      const err = createError('No translation', 'EMPTY_TRANSLATION')
+      return NextResponse.json({ error: err }, { status: 500 })
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       data: { translation }
     })
   } catch (error) {
-    console.error('Translation error:', error)
+    console.error('Error:', error)
     const apiError = handleApiError(error)
     return NextResponse.json({ error: apiError }, { status: 500 })
   }
