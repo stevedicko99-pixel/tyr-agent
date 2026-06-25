@@ -19,7 +19,7 @@ import {
 import { Supplier, Transitaire } from '@/types'
 import toast from 'react-hot-toast'
 
-// Données mockées avec les nouveaux champs
+// DonnÃ©es mockÃ©es avec les nouveaux champs
 const mockSuppliers: Supplier[] = [
   {
     id: '1',
@@ -30,12 +30,13 @@ const mockSuppliers: Supplier[] = [
     phone: '+86 138 1234 5678',
     wechat: 'wang_electronics',
     alibaba_url: 'https://alibaba.com/supplier/1',
+    address: null,
     city: 'Shenzhen',
     country: 'Chine',
     rating: 4.5,
     source: 'agent',
     is_verified: false,
-    notes: 'Fournisseur fiable pour électronique',
+    notes: 'Fournisseur fiable pour electronique',
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
@@ -47,12 +48,13 @@ const mockSuppliers: Supplier[] = [
     email: 'li@gz-textiles.com',
     phone: '+86 139 8765 4321',
     wechat: 'li_textiles',
+    address: null,
     city: 'Guangzhou',
     country: 'Chine',
     rating: 4,
     source: 'agent',
     is_verified: true,
-    notes: 'Bon rapport qualité/prix',
+    notes: 'Bon rapport qualite/prix',
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
@@ -72,7 +74,7 @@ const mockTransitaires: Transitaire[] = [
     country: 'Chine',
     source: 'agent',
     is_verified: false,
-    notes: 'Spécialiste Afrique de l\'Ouest',
+    notes: 'SpÃ©cialiste Afrique de l\'Ouest',
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
@@ -118,7 +120,7 @@ export default function AddressBookPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-tyr-navy">Carnet d&apos;adresses</h1>
-          <p className="text-gray-500 text-sm mt-1">Gérez vos fournisseurs et transitaires</p>
+          <p className="text-gray-500 text-sm mt-1">GÃ©rez vos fournisseurs et transitaires</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
@@ -180,7 +182,7 @@ export default function AddressBookPage() {
             {filteredSuppliers.length === 0 ? (
               <div className="bg-white rounded-xl p-8 text-center border border-gray-200">
                 <Building2 className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500">Aucun fournisseur trouvé</p>
+                <p className="text-gray-500">Aucun fournisseur trouvÃ©</p>
               </div>
             ) : (
               filteredSuppliers.map((supplier) => (
@@ -195,9 +197,9 @@ export default function AddressBookPage() {
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-semibold text-tyr-navy">{supplier.name}</h3>
                         {supplier.is_verified ? (
-                          <Shield className="w-4 h-4 text-green-500" title="Vérifié" />
+                          <Shield className="w-4 h-4 text-green-500" title="VÃ©rifiÃ©" />
                         ) : (
-                          <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-500 rounded">Non vérifié</span>
+                          <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-500 rounded">Non vÃ©rifiÃ©</span>
                         )}
                         {supplier.source === 'importateur' && (
                           <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-600 rounded flex items-center gap-1">
@@ -206,7 +208,7 @@ export default function AddressBookPage() {
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-500">{supplier.contact_name} • {supplier.city}, {supplier.country}</p>
+                      <p className="text-sm text-gray-500">{supplier.contact_name} â€¢ {supplier.city}, {supplier.country}</p>
                       
                       <div className="flex items-center gap-2 mt-1">
                         {supplier.rating && renderStars(supplier.rating)}
@@ -264,7 +266,7 @@ export default function AddressBookPage() {
             {filteredTransitaires.length === 0 ? (
               <div className="bg-white rounded-xl p-8 text-center border border-gray-200">
                 <Truck className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500">Aucun transitaire trouvé</p>
+                <p className="text-gray-500">Aucun transitaire trouvÃ©</p>
               </div>
             ) : (
               filteredTransitaires.map((transitaire) => (
@@ -279,12 +281,12 @@ export default function AddressBookPage() {
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-semibold text-tyr-navy">{transitaire.name}</h3>
                         {transitaire.is_verified ? (
-                          <Shield className="w-4 h-4 text-green-500" title="Vérifié" />
+                          <Shield className="w-4 h-4 text-green-500" title="VÃ©rifiÃ©" />
                         ) : (
-                          <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-500 rounded">Non vérifié</span>
+                          <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-500 rounded">Non vÃ©rifiÃ©</span>
                         )}
                       </div>
-                      <p className="text-sm text-gray-500">{transitaire.contact_name} • {transitaire.city}, {transitaire.country}</p>
+                      <p className="text-sm text-gray-500">{transitaire.contact_name} â€¢ {transitaire.city}, {transitaire.country}</p>
                       
                       <div className="flex flex-wrap gap-3 mt-3">
                         {transitaire.phone && (
@@ -361,7 +363,7 @@ export default function AddressBookPage() {
               
               <form className="space-y-4" onSubmit={(e) => {
                 e.preventDefault()
-                toast.success('Contact ajouté avec succès (source: agent, non vérifié)')
+                toast.success('Contact ajoutÃ© avec succÃ¨s (source: agent, non vÃ©rifiÃ©)')
                 setShowAddModal(false)
               }}>
                 <div>
@@ -397,7 +399,7 @@ export default function AddressBookPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Téléphone
+                      TÃ©lÃ©phone
                     </label>
                     <input
                       type="tel"
@@ -451,7 +453,7 @@ export default function AddressBookPage() {
                 </div>
 
                 <div className="bg-blue-50 text-blue-700 text-xs p-3 rounded-lg">
-                  <p>Ce contact sera créé avec :</p>
+                  <p>Ce contact sera crÃ©Ã© avec :</p>
                   <ul className="list-disc list-inside mt-1">
                     <li>source: &apos;agent&apos;</li>
                     <li>is_verified: false</li>
