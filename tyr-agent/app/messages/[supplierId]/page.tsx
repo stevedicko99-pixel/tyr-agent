@@ -113,9 +113,18 @@ export default function MessageDetailPage() {
         body: JSON.stringify({ text, targetLang, sourceLang: targetLang === 'zh' ? 'fr' : 'zh' })
       })
       const data = await response.json()
-      return data.translation || text
+      if (data.error) {
+        console.error('Translation API error:', data.error)
+        toast.error(data.error.message || 'Erreur de traduction')
+        return text
+      }
+      if (data.warning) {
+        console.warn('Translation warning:', data.warning)
+      }
+      return data.data?.translation || data.translation || text
     } catch (error) {
       console.error('Translation error:', error)
+      toast.error('Erreur de connexion pour la traduction')
       return text
     }
   }

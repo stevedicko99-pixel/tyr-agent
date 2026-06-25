@@ -11,9 +11,10 @@ import {
   Percent,
   Package,
   Truck,
-  Shield
+  Shield,
+  Globe
 } from '@/components/icons'
-import { PRODUCT_CATEGORIES } from '@/types'
+import { PRODUCT_CATEGORIES, CURRENCIES } from '@/types'
 
 interface MarginCalculatorProps {
   initialValues?: {
@@ -39,6 +40,14 @@ interface MarginValues {
   marginRate: number
 }
 
+const CURRENCY_DISPLAY: Record<string, { symbol: string; name: string; decimals: number }> = {
+  EUR: { symbol: '€', name: 'Euro', decimals: 2 },
+  USD: { symbol: '$', name: 'Dollar US', decimals: 2 },
+  CNY: { symbol: '¥', name: 'Yuan Chinois', decimals: 2 },
+  XOF: { symbol: 'F CFA', name: 'Franc CFA', decimals: 0 },
+  CDF: { symbol: 'F CDF', name: 'Franc Congolais', decimals: 2 },
+}
+
 export function MarginCalculator({ initialValues, onSave }: MarginCalculatorProps) {
   const [values, setValues] = useState({
     purchasePrice: initialValues?.purchasePrice || 0,
@@ -55,6 +64,13 @@ export function MarginCalculator({ initialValues, onSave }: MarginCalculatorProp
     const cat = PRODUCT_CATEGORIES.find(c => c.value === values.category)
     if (cat) setDutyRate(cat.duty_rate)
   }, [values.category])
+
+  const formatCurrency = (amount: number): string => {
+    const currency = CURRENCY_DISPLAY[values.currency] || CURRENCY_DISPLAY.EUR
+    const decimals = currency.decimals
+    const roundedAmount = decimals === 0 ? Math.round(amount) : amount
+    return `${roundedAmount.toLocaleString('fr-FR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })} ${values.currency}`
+  }
 
   const calculations: MarginValues = {
     purchasePrice: values.purchasePrice,
@@ -107,7 +123,7 @@ export function MarginCalculator({ initialValues, onSave }: MarginCalculatorProp
           {/* Purchase Price */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Prix d&apos;achat unitaire (FOB)
+              Prix d'achat unitaire (FOB)
             </label>
             <div className="relative">
               <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -117,6 +133,7 @@ export function MarginCalculator({ initialValues, onSave }: MarginCalculatorProp
                 onChange={(e) => handleInputChange('purchasePrice', parseFloat(e.target.value) || 0)}
                 placeholder="0.00"
                 className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tyr-orange focus:border-transparent outline-none"
+                step={CURRENCY_DISPLAY[values.currency]?.decimals === 0 ? '1' : '0.01'}
               />
             </div>
           </div>
@@ -151,7 +168,29 @@ export function MarginCalculator({ initialValues, onSave }: MarginCalculatorProp
                 onChange={(e) => handleInputChange('shippingCost', parseFloat(e.target.value) || 0)}
                 placeholder="0.00"
                 className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tyr-orange focus:border-transparent outline-none"
+                step={CURRENCY_DISPLAY[values.currency]?.decimals === 0 ? '1' : '0.01'}
               />
+            </div>
+          </div>
+
+          {/* Currency */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Devise
+            </label>
+            <div className="relative">
+              <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <select
+                value={values.currency}
+                onChange={(e) => handleInputChange('currency', e.target.value)}
+                className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tyr-orange focus:border-transparent outline-none appearance-none bg-white"
+              >
+                {CURRENCIES.map((currency) => (
+                  <option key={currency} value={currency}>
+                    {currency} - {CURRENCY_DISPLAY[currency]?.name || currency}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -177,7 +216,7 @@ export function MarginCalculator({ initialValues, onSave }: MarginCalculatorProp
           </div>
 
           {/* Selling Price */}
-          <div className="md:col-span-2">
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Prix de vente au client
             </label>
@@ -189,6 +228,7 @@ export function MarginCalculator({ initialValues, onSave }: MarginCalculatorProp
                 onChange={(e) => handleInputChange('sellingPrice', parseFloat(e.target.value) || 0)}
                 placeholder="0.00"
                 className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tyr-orange focus:border-transparent outline-none"
+                step={CURRENCY_DISPLAY[values.currency]?.decimals === 0 ? '1' : '0.01'}
               />
             </div>
           </div>
@@ -204,27 +244,27 @@ export function MarginCalculator({ initialValues, onSave }: MarginCalculatorProp
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-xs text-gray-500 mb-1">Coût d&apos;achat</p>
+            <p className="text-xs text-gray-500 mb-1">Coût d'achat</p>
             <p className="font-semibold text-tyr-navy">
-              {(values.purchasePrice * values.quantity).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {values.currency}
+              {formatCurrency(values.purchasePrice * values.quantity)}
             </p>
           </div>
           <div className="bg-gray-50 rounded-lg p-4">
             <p className="text-xs text-gray-500 mb-1">Fret</p>
             <p className="font-semibold text-tyr-navy">
-              {values.shippingCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {values.currency}
+              {formatCurrency(values.shippingCost)}
             </p>
           </div>
           <div className="bg-gray-50 rounded-lg p-4">
             <p className="text-xs text-gray-500 mb-1">Droits de douane ({(dutyRate * 100).toFixed(0)}%)</p>
             <p className="font-semibold text-tyr-navy">
-              {calculations.customsDuty.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {values.currency}
+              {formatCurrency(calculations.customsDuty)}
             </p>
           </div>
           <div className="bg-gray-50 rounded-lg p-4">
             <p className="text-xs text-gray-500 mb-1">Coût total rendu</p>
             <p className="font-bold text-tyr-navy">
-              {calculations.totalCost.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {values.currency}
+              {formatCurrency(calculations.totalCost)}
             </p>
           </div>
         </div>
@@ -235,7 +275,7 @@ export function MarginCalculator({ initialValues, onSave }: MarginCalculatorProp
             <div>
               <p className="text-sm opacity-80 mb-1">Marge brute</p>
               <p className="text-3xl font-bold">
-                {calculations.margin.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {values.currency}
+                {formatCurrency(calculations.margin)}
               </p>
             </div>
             <div className="text-right">

@@ -198,7 +198,7 @@ export default function AddressBookPage() {
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-semibold text-tyr-navy">{supplier.name}</h3>
                         {supplier.is_verified ? (
-                          <Shield className="w-4 h-4 text-green-500" title="VÃ©rifiÃ©" />
+                          <Shield className="w-4 h-4 text-green-500" />
                         ) : (
                           <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-500 rounded">Non vÃ©rifiÃ©</span>
                         )}
@@ -282,7 +282,7 @@ export default function AddressBookPage() {
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-semibold text-tyr-navy">{transitaire.name}</h3>
                         {transitaire.is_verified ? (
-                          <Shield className="w-4 h-4 text-green-500" title="VÃ©rifiÃ©" />
+                          <Shield className="w-4 h-4 text-green-500" />
                         ) : (
                           <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-500 rounded">Non vÃ©rifiÃ©</span>
                         )}
