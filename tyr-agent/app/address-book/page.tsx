@@ -48,6 +48,7 @@ const mockSuppliers: Supplier[] = [
     email: 'li@gz-textiles.com',
     phone: '+86 139 8765 4321',
     wechat: 'li_textiles',
+    alibaba_url: null,
     address: null,
     city: 'Guangzhou',
     country: 'Chine',
