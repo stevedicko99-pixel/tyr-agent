@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (agentError || !agent) {
-      const error = createError('Agent non trouvé', 'AGENT_NOT_FOUND')
+      const error = createError('Agent non trouvÃ©', 'AGENT_NOT_FOUND')
       return NextResponse.json({ error }, { status: 404 })
     }
 
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
 
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf']
     if (!allowedTypes.includes(paymentProof.type)) {
-      const error = validationError('paymentProof', 'Type de fichier non autorisé (JPG, PNG, GIF, PDF)')
+      const error = validationError('paymentProof', 'Type de fichier non autorisÃ© (JPG, PNG, GIF, PDF)')
       return NextResponse.json({ error }, { status: 400 })
     }
 
@@ -82,19 +82,18 @@ export async function POST(request: NextRequest) {
 
     if (uploadError) {
       console.error('Upload error:', uploadError)
-      const error = createError('Échec de l\'upload', 'UPLOAD_FAILED', uploadError.message)
+      const error = createError('Ã‰chec de l\'upload', 'UPLOAD_FAILED', uploadError.message)
       return NextResponse.json({ error }, { status: 500 })
     }
 
     // Get public URL
-    const { data: urlData, error: urlError } = supabase
+    const { data: urlData } = supabase
       .storage
       .from('payment-proofs')
       .getPublicUrl(fileName)
 
-    if (urlError || !urlData) {
-      console.error('URL error:', urlError)
-      const error = createError('Échec de la récupération de l\'URL', 'URL_FAILED')
+    if (!urlData || !urlData.publicUrl) {
+      const error = createError('Failed to get public URL', 'URL_FAILED')
       return NextResponse.json({ error }, { status: 500 })
     }
 
@@ -118,7 +117,7 @@ export async function POST(request: NextRequest) {
       console.error('Order error:', orderError)
       // Clean up uploaded file
       await supabase.storage.from('payment-proofs').remove([fileName])
-      const error = createError('Échec de la création de la commande', 'ORDER_FAILED', orderError.message)
+      const error = createError('Ã‰chec de la crÃ©ation de la commande', 'ORDER_FAILED', orderError.message)
       return NextResponse.json({ error }, { status: 500 })
     }
 
@@ -126,7 +125,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: {
         order,
-        message: 'Commande soumise avec succès. Nous vous contacterons bientôt.',
+        message: 'Commande soumise avec succÃ¨s. Nous vous contacterons bientÃ´t.',
       },
     }, { status: 201 })
 
